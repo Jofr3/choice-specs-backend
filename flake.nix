@@ -1,5 +1,5 @@
 {
-  description = "Choice specs frontend";
+  description = "Choice specs backend";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
@@ -18,7 +18,7 @@
             ];
 
             shellHook = ''
-                echo "Choice specs frontend"
+                echo "Choice specs backend"
             '';
         };
     };
