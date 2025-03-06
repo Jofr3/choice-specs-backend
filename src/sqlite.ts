@@ -9,15 +9,15 @@ app.get("/populate", (c) => {
 
   try {
     const tables = [
-      { 
-        name: "users", 
+      {
+        name: "users",
         properties: [
           "id INTEGER PRIMARY KEY AUTOINCREMENT",
           "name TEXT",
         ]
       },
-      { 
-        name: "pokemon", 
+      {
+        name: "pokemon",
         properties: [
           "id INTEGER PRIMARY KEY AUTOINCREMENT",
           "name TEXT",
@@ -35,15 +35,15 @@ app.get("/populate", (c) => {
     db.exec("PRAGMA journal_mode = WAL;")
 
     return c.json({ success: true })
-  } catch (e) {
+  } catch (error) {
 
     db.run("ROLLBACK");
-    return c.json({ success: false, error: e })
+    return c.json({ success: false, error })
   } finally {
     db.close();
   }
 })
-  
+
 
 app.get("/seeder", (c) => {
   const db = new Database("db.sqlite")
@@ -60,7 +60,7 @@ app.get("/seeder", (c) => {
       INSERT INTO users (name) 
       VALUES ($name);
     `);
-    
+
     for (const user of users) {
       insert.run({
         $name: user.name,
@@ -69,26 +69,36 @@ app.get("/seeder", (c) => {
 
     db.run("COMMIT");
     return c.json({ success: true })
-  } catch (e) {
-
+  } catch (error) {
     db.run("ROLLBACK");
-    return c.json({ success: false, error: e })
+    return c.json({ success: false, error })
   } finally {
     db.close();
   }
 })
 
 app.get("/tables", (c) => {
-  const db = new Database("db.sqlite")
-  const rows = db.query("SELECT name FROM sqlite_master WHERE type='table' AND name != 'sqlite_sequence' ORDER BY name;").all()
-  return c.json(rows)
+  try {
+    const db = new Database("db.sqlite")
+    const result = db.query("SELECT name FROM sqlite_master WHERE type='table' AND name != 'sqlite_sequence' ORDER BY name;").all()
+
+    return c.json({ success: true, result })
+  } catch (error) {
+    return c.json({ success: false, error })
+  }
 })
 
 app.get("/query/:query", (c) => {
   const query = c.req.param("query")
-  const db = new Database("db.sqlite")
-  const rows = db.query(`${query};`).all()
-  return c.json(rows)
+
+  try {
+    const db = new Database("db.sqlite")
+    const result = db.query(`${query};`).all()
+
+    return c.json({ success: true, result })
+  } catch (error) {
+    return c.json({ success: false, error })
+  }
 })
 
 export default app
